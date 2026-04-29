@@ -18,7 +18,7 @@
         </p>
         <div class="hero-actions">
             <a href="{{ url_for('register') }}" class="btn-primary">Create free account</a>
-            <a href="#how-it-works" class="btn-secondary">See how it works</a>
+            <a href="#" class="btn-secondary" id="open-modal">See how it works</a>
         </div>
     </div>
     <div class="hero-visual">
@@ -96,5 +96,53 @@
         <a href="{{ url_for('register') }}" class="btn-primary">Create free account</a>
     </div>
 </section>
+
+<div class="modal-overlay" id="video-modal">
+    <div class="modal-content">
+        <button class="modal-close" id="modal-close">&times;</button>
+        <div class="video-container">
+            <iframe id="video-frame" src="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    const modal = document.getElementById('video-modal');
+    const openBtn = document.getElementById('open-modal');
+    const closeBtn = document.getElementById('modal-close');
+    const videoFrame = document.getElementById('video-frame');
+    const videoUrl = 'https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1';
+
+    openBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        videoFrame.src = videoUrl;
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    });
+
+    closeBtn.addEventListener('click', function() {
+        videoFrame.src = '';
+        modal.style.display = 'none';
+        document.body.style.overflow = '';
+    });
+
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) {
+            videoFrame.src = '';
+            modal.style.display = 'none';
+            document.body.style.overflow = '';
+        }
+    });
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && modal.style.display === 'flex') {
+            videoFrame.src = '';
+            modal.style.display = 'none';
+            document.body.style.overflow = '';
+        }
+    });
+})();
+</script>
 
 {% endblock %}

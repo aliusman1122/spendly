@@ -76,3 +76,27 @@ def seed_db():
         conn.commit()
     finally:
         conn.close()
+
+
+def get_user_by_email(email):
+    conn = get_db()
+    try:
+        user = conn.execute(
+            "SELECT id, name, email, password_hash, created_at FROM users WHERE email = ?",
+            (email,)
+        ).fetchone()
+        return dict(user) if user else None
+    finally:
+        conn.close()
+
+
+def get_user_by_id(user_id):
+    conn = get_db()
+    try:
+        user = conn.execute(
+            "SELECT id, name, email, created_at FROM users WHERE id = ?",
+            (user_id,)
+        ).fetchone()
+        return dict(user) if user else None
+    finally:
+        conn.close()

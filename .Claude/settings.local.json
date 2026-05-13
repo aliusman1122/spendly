@@ -1,7 +1,10 @@
 {
   "permissions": {
     "allow": [
-      "Bash(python *)"
+      "Bash(python *)",
+      "Bash(curl -s -c \"C:\\\\Users\\\\hp\\\\cookies.txt\" -b \"C:\\\\Users\\\\hp\\\\cookies.txt\" \"http://127.0.0.1:5001/logout\" -w \"%{http_code}\")",
+      "Bash(curl -s -c \"C:\\\\Users\\\\hp\\\\cookies.txt\" \"http://127.0.0.1:5001/register\")",
+      "Bash(curl -s -c \"C:\\\\Users\\\\hp\\\\cookies.txt\" \"http://127.0.0.1:5001/login\")"
     ]
   }
 }

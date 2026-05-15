@@ -114,7 +114,7 @@ def privacy():
 @app.route("/logout", methods=["GET", "POST"])
 def logout():
     session.clear()
-    return redirect(url_for("login"))
+    return redirect(url_for("landing"))
 
 
 @app.route("/profile")

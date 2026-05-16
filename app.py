@@ -34,13 +34,15 @@ with app.app_context():
 
 @app.route("/")
 def landing():
+    if session.get("user_id"):
+        return redirect(url_for("profile"))
     return render_template("landing.html")
 
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
     if session.get("user_id"):
-        return redirect(url_for("landing"))
+        return redirect(url_for("profile"))
 
     if request.method == "POST":
         name = request.form.get("name", "").strip()
@@ -80,7 +82,7 @@ def register():
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if session.get("user_id"):
-        return redirect(url_for("landing"))
+        return redirect(url_for("profile"))
 
     if request.method == "POST":
         email = request.form.get("email", "").strip().lower()
@@ -90,7 +92,7 @@ def login():
         if user and check_password_hash(user["password_hash"], password):
             session["user_id"] = user["id"]
             session["user_name"] = user["name"]
-            return redirect(url_for("landing"))
+            return redirect(url_for("profile"))
         else:
             return render_template("login.html", error="Invalid email or password")
 
@@ -119,7 +121,44 @@ def logout():
 
 @app.route("/profile")
 def profile():
-    return "Profile page — coming in Step 4"
+    # Redirect if not logged in
+    if not session.get("user_id"):
+        return redirect(url_for("login"))
+
+    # Hardcoded data for UI design (will be replaced with DB queries in Step 5)
+    user = {
+        "name": "Alex Morgan",
+        "email": "alex@example.com",
+        "member_since": "January 2025"
+    }
+
+    stats = {
+        "total_spent": 45750,
+        "transaction_count": 24,
+        "top_category": "Food & Dining"
+    }
+
+    transactions = [
+        {"date": "2025-05-15", "description": "Swiggy order", "category": "Food", "amount": 450},
+        {"date": "2025-05-14", "description": "Metro recharge", "category": "Transport", "amount": 200},
+        {"date": "2025-05-13", "description": "Amazon purchase", "category": "Shopping", "amount": 1299},
+    ]
+
+    categories = [
+        {"name": "Food & Dining", "amount": 18500, "color": "food"},
+        {"name": "Transport", "amount": 8200, "color": "transport"},
+        {"name": "Shopping", "amount": 12000, "color": "shopping"},
+    ]
+
+    # Calculate max for progress bars
+    max_category_amount = max(cat["amount"] for cat in categories)
+
+    return render_template("profile.html",
+                         user=user,
+                         stats=stats,
+                         transactions=transactions,
+                         categories=categories,
+                         max_category_amount=max_category_amount)
 
 
 @app.route("/expenses/add")

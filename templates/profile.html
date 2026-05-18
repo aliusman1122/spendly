@@ -41,6 +41,22 @@
         </div>
     </div>
 
+    {# Date Filter Bar #}
+    <div class="filter-bar">
+        <div class="filter-presets">
+            <a href="{{ url_for('profile') }}" class="preset-btn {% if not active_filter %}active{% endif %}">All Time</a>
+            <a href="{{ url_for('profile', date_from=this_month_from, date_to=today) }}" class="preset-btn {% if active_filter == 'this_month' %}active{% endif %}">This Month</a>
+            <a href="{{ url_for('profile', date_from=last_3m_from, date_to=today) }}" class="preset-btn {% if active_filter == 'last_3m' %}active{% endif %}">Last 3 Months</a>
+            <a href="{{ url_for('profile', date_from=last_6m_from, date_to=today) }}" class="preset-btn {% if active_filter == 'last_6m' %}active{% endif %}">Last 6 Months</a>
+        </div>
+        <form method="GET" class="filter-custom">
+            <input type="date" name="date_from" value="{{ date_from }}">
+            <span class="filter-separator">to</span>
+            <input type="date" name="date_to" value="{{ date_to }}">
+            <button type="submit" class="filter-apply-btn">Apply</button>
+        </form>
+    </div>
+
     {# Transaction History #}
     <div class="tx-section">
         <h2 class="section-title">

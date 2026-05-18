@@ -2,7 +2,7 @@ import os
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 from flask_wtf.csrf import CSRFProtect
 from werkzeug.security import generate_password_hash, check_password_hash
-from database.db import get_db, init_db, seed_db, get_user_by_email, get_user_by_id
+from database.db import get_db, init_db, seed_db, get_user_by_email, get_user_by_id, get_user_expenses, get_expense_stats, get_expenses_by_category
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
@@ -125,33 +125,31 @@ def profile():
     if not session.get("user_id"):
         return redirect(url_for("login"))
 
-    # Hardcoded data for UI design (will be replaced with DB queries in Step 5)
+    user_id = session.get("user_id")
+
+    # Fetch user data from database
+    db_user = get_user_by_id(user_id)
+    if db_user:
+        import datetime
+        created = datetime.datetime.strptime(db_user["created_at"], "%Y-%m-%d %H:%M:%S")
+        member_since = created.strftime("%B %Y")
+    else:
+        member_since = "Unknown"
+
     user = {
-        "name": "Alex Morgan",
-        "email": "alex@example.com",
-        "member_since": "January 2025"
+        "name": db_user["name"] if db_user else "User",
+        "email": db_user["email"] if db_user else "",
+        "member_since": member_since
     }
 
-    stats = {
-        "total_spent": 45750,
-        "transaction_count": 24,
-        "top_category": "Food & Dining"
-    }
+    stats = get_expense_stats(user_id)
 
-    transactions = [
-        {"date": "2025-05-15", "description": "Swiggy order", "category": "Food", "amount": 450},
-        {"date": "2025-05-14", "description": "Metro recharge", "category": "Transport", "amount": 200},
-        {"date": "2025-05-13", "description": "Amazon purchase", "category": "Shopping", "amount": 1299},
-    ]
+    transactions = get_user_expenses(user_id, limit=10)
 
-    categories = [
-        {"name": "Food & Dining", "amount": 18500, "color": "food"},
-        {"name": "Transport", "amount": 8200, "color": "transport"},
-        {"name": "Shopping", "amount": 12000, "color": "shopping"},
-    ]
+    categories = get_expenses_by_category(user_id)
 
     # Calculate max for progress bars
-    max_category_amount = max(cat["amount"] for cat in categories)
+    max_category_amount = max((cat["amount"] for cat in categories), default=0)
 
     return render_template("profile.html",
                          user=user,

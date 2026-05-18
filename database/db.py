@@ -100,3 +100,49 @@ def get_user_by_id(user_id):
         return dict(user) if user else None
     finally:
         conn.close()
+
+
+def get_user_expenses(user_id, limit=10):
+    conn = get_db()
+    try:
+        expenses = conn.execute(
+            "SELECT date, description, category, amount FROM expenses WHERE user_id = ? ORDER BY date DESC LIMIT ?",
+            (user_id, limit)
+        ).fetchall()
+        return [dict(row) for row in expenses]
+    finally:
+        conn.close()
+
+
+def get_expense_stats(user_id):
+    conn = get_db()
+    try:
+        result = conn.execute(
+            "SELECT SUM(amount) as total_spent, COUNT(*) as transaction_count FROM expenses WHERE user_id = ?",
+            (user_id,)
+        ).fetchone()
+
+        top_category_row = conn.execute(
+            "SELECT category, SUM(amount) as amount FROM expenses WHERE user_id = ? GROUP BY category ORDER BY amount DESC LIMIT 1",
+            (user_id,)
+        ).fetchone()
+
+        return {
+            "total_spent": result["total_spent"] or 0,
+            "transaction_count": result["transaction_count"] or 0,
+            "top_category": top_category_row["category"] if top_category_row else "None"
+        }
+    finally:
+        conn.close()
+
+
+def get_expenses_by_category(user_id):
+    conn = get_db()
+    try:
+        categories = conn.execute(
+            "SELECT category as name, SUM(amount) as amount FROM expenses WHERE user_id = ? GROUP BY category ORDER BY amount DESC",
+            (user_id,)
+        ).fetchall()
+        return [dict(row) for row in categories]
+    finally:
+        conn.close()

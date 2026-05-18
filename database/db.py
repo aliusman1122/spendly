@@ -102,30 +102,47 @@ def get_user_by_id(user_id):
         conn.close()
 
 
-def get_user_expenses(user_id, limit=10):
+def get_user_expenses(user_id, limit=10, date_from=None, date_to=None):
     conn = get_db()
     try:
-        expenses = conn.execute(
-            "SELECT date, description, category, amount FROM expenses WHERE user_id = ? ORDER BY date DESC LIMIT ?",
-            (user_id, limit)
-        ).fetchall()
+        query = "SELECT date, description, category, amount FROM expenses WHERE user_id = ?"
+        params = [user_id]
+
+        if date_from and date_to:
+            query += " AND date BETWEEN ? AND ?"
+            params.extend([date_from, date_to])
+
+        query += " ORDER BY date DESC LIMIT ?"
+        params.append(limit)
+
+        expenses = conn.execute(query, params).fetchall()
         return [dict(row) for row in expenses]
     finally:
         conn.close()
 
 
-def get_expense_stats(user_id):
+def get_expense_stats(user_id, date_from=None, date_to=None):
     conn = get_db()
     try:
-        result = conn.execute(
-            "SELECT SUM(amount) as total_spent, COUNT(*) as transaction_count FROM expenses WHERE user_id = ?",
-            (user_id,)
-        ).fetchone()
+        query = "SELECT SUM(amount) as total_spent, COUNT(*) as transaction_count FROM expenses WHERE user_id = ?"
+        params = [user_id]
 
-        top_category_row = conn.execute(
-            "SELECT category, SUM(amount) as amount FROM expenses WHERE user_id = ? GROUP BY category ORDER BY amount DESC LIMIT 1",
-            (user_id,)
-        ).fetchone()
+        if date_from and date_to:
+            query += " AND date BETWEEN ? AND ?"
+            params.extend([date_from, date_to])
+
+        result = conn.execute(query, params).fetchone()
+
+        # Top category query
+        top_query = "SELECT category, SUM(amount) as amount FROM expenses WHERE user_id = ?"
+        top_params = [user_id]
+
+        if date_from and date_to:
+            top_query += " AND date BETWEEN ? AND ?"
+            top_params.extend([date_from, date_to])
+
+        top_query += " GROUP BY category ORDER BY amount DESC LIMIT 1"
+        top_category_row = conn.execute(top_query, top_params).fetchone()
 
         return {
             "total_spent": result["total_spent"] or 0,
@@ -136,13 +153,19 @@ def get_expense_stats(user_id):
         conn.close()
 
 
-def get_expenses_by_category(user_id):
+def get_expenses_by_category(user_id, date_from=None, date_to=None):
     conn = get_db()
     try:
-        categories = conn.execute(
-            "SELECT category as name, SUM(amount) as amount FROM expenses WHERE user_id = ? GROUP BY category ORDER BY amount DESC",
-            (user_id,)
-        ).fetchall()
+        query = "SELECT category as name, SUM(amount) as amount FROM expenses WHERE user_id = ?"
+        params = [user_id]
+
+        if date_from and date_to:
+            query += " AND date BETWEEN ? AND ?"
+            params.extend([date_from, date_to])
+
+        query += " GROUP BY category ORDER BY amount DESC"
+
+        categories = conn.execute(query, params).fetchall()
         return [dict(row) for row in categories]
     finally:
         conn.close()

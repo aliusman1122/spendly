@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}Analytics - Spendly{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/analytics.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="analytics-page">
+    <div class="coming-soon-container">
+        <div class="coming-soon-card">
+            <div class="coming-soon-icon">
+                <i data-lucide="bar-chart-3"></i>
+            </div>
+            <h1 class="coming-soon-title">Analytics Coming Soon</h1>
+            <p class="coming-soon-subtitle">Get powerful insights into your spending habits with advanced analytics, charts, and trends.</p>
+
+            <div class="features-preview">
+                <div class="feature-preview-item">
+                    <i data-lucide="trending-up"></i>
+                    <span>Spending Trends</span>
+                </div>
+                <div class="feature-preview-item">
+                    <i data-lucide="pie-chart"></i>
+                    <span>Category Breakdown</span>
+                </div>
+                <div class="feature-preview-item">
+                    <i data-lucide="calendar"></i>
+                    <span>Monthly Comparisons</span>
+                </div>
+                <div class="feature-preview-item">
+                    <i data-lucide="target"></i>
+                    <span>Budget Goals</span>
+                </div>
+            </div>
+
+            <div class="coming-soon-action">
+                <a href="{{ url_for('profile') }}" class="btn-primary">Back to Profile</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    lucide.createIcons();
+</script>
+{% endblock %}

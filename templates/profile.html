@@ -59,10 +59,16 @@
 
     {# Transaction History #}
     <div class="tx-section">
-        <h2 class="section-title">
-            <i data-lucide="history" style="width: 20px; height: 20px;"></i>
-            Recent Transactions
-        </h2>
+        <div class="section-header">
+            <h2 class="section-title">
+                <i data-lucide="history" style="width: 20px; height: 20px;"></i>
+                Recent Transactions
+            </h2>
+            <a href="{{ url_for('add_expense') }}" class="btn-add-expense">
+                <i data-lucide="plus" style="width: 16px; height: 16px;"></i>
+                Add Expense
+            </a>
+        </div>
         <table class="tx-table">
             <thead>
                 <tr>

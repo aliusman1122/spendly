@@ -3,7 +3,7 @@ import datetime
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 from flask_wtf.csrf import CSRFProtect
 from werkzeug.security import generate_password_hash, check_password_hash
-from database.db import get_db, init_db, seed_db, get_user_by_email, get_user_by_id, get_user_expenses, get_expense_stats, get_expenses_by_category
+from database.db import get_db, init_db, seed_db, get_user_by_email, get_user_by_id, get_user_expenses, get_expense_stats, get_expenses_by_category, insert_expense
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
@@ -226,9 +226,50 @@ def analytics():
     return render_template("analytics.html")
 
 
-@app.route("/expenses/add")
+@app.route("/expenses/add", methods=["GET", "POST"])
 def add_expense():
-    return "Add expense — coming in Step 7"
+    if not session.get("user_id"):
+        return redirect(url_for("login"))
+
+    categories = ["Food", "Transport", "Bills", "Health", "Entertainment", "Shopping", "Other"]
+    today = datetime.date.today().isoformat()
+
+    if request.method == "POST":
+        amount = request.form.get("amount", "").strip()
+        category = request.form.get("category", "").strip()
+        date = request.form.get("date", "").strip()
+        description = request.form.get("description", "").strip()
+
+        # Validate amount
+        try:
+            amount_float = float(amount)
+            if amount_float <= 0:
+                return render_template("add_expense.html", error="Amount must be a positive number", categories=categories, today=today, amount=amount, selected_category=category, date=date, description=description)
+        except ValueError:
+            return render_template("add_expense.html", error="Please enter a valid amount", categories=categories, today=today, amount=amount, selected_category=category, date=date, description=description)
+
+        # Validate category
+        if category not in categories:
+            return render_template("add_expense.html", error="Please select a valid category", categories=categories, today=today, amount=amount, selected_category=category, date=date, description=description)
+
+        # Validate date
+        try:
+            datetime.datetime.strptime(date, "%Y-%m-%d")
+        except ValueError:
+            return render_template("add_expense.html", error="Please enter a valid date", categories=categories, today=today, amount=amount, selected_category=category, date=date, description=description)
+
+        # Description is optional
+        if not description:
+            description = None
+
+        # Insert expense
+        user_id = session.get("user_id")
+        insert_expense(user_id, amount_float, category, date, description)
+
+        flash("Expense added successfully!")
+        return redirect(url_for("profile"))
+
+    return render_template("add_expense.html", categories=categories, today=today)
 
 
 @app.route("/expenses/<int:id>/edit")
